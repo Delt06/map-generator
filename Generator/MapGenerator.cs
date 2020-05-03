@@ -42,7 +42,7 @@ namespace Generator
 
             if (RoomTemplates.Count == 0) return;
 
-            var (startX, startY) = GetRandomStart();
+            var (startX, startY) = GetStart();
             var startingRoom = GetRandomRoomTemplate();
 
             _map.SetRoom(startX, startY, startingRoom);
@@ -64,10 +64,10 @@ namespace Generator
             _map.AddOuterWalls();
         }
 
-        private (int x, int y) GetRandomStart()
+        private (int x, int y) GetStart()
         {
-            var x = _random.Next() % _map.Width;
-            var y = _random.Next() % _map.Height;
+            var x = _map.Width / 2;
+            var y = _map.Height / 2;
 
             return (x, y);
         }

@@ -83,7 +83,7 @@ namespace Generator
                 {
                     for (var y = 0; y < Height; y++)
                     {
-                        hashCode = HashCode.Combine(_cells[x, y], x, y);
+                        hashCode = _cells[x, y].GetHashCode() + 23 * x + 23 * 23 * y;
                     }
                 }
 
