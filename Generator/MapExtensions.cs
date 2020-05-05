@@ -130,8 +130,14 @@ namespace Generator
             return map;
         }
 
-        private static void CopyTo(this IRoom source, IRoom destination)
+        public static void CopyTo(this IRoom source, IRoom destination)
         {
+            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (destination == null) throw new ArgumentNullException(nameof(destination));
+            
+            if (source.Width != destination.Width) throw new ArgumentException($"Source.Width differs from Destination.Width: {source.Width} and {destination.Width}.");
+            if (source.Height != destination.Height) throw new ArgumentException($"Source.Height differs from Destination.Height: {source.Height} and {destination.Height}.");
+            
             for (var x = 0; x < source.Width; x++)
             {
                 for (var y = 0; y < source.Height; y++)

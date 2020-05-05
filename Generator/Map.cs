@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Generator
 {
-    public sealed class Map : IEnumerable<IRoom>
+    public sealed class Map : IEnumerable<IRoom>, ICloneable
     {
         private readonly IRoom[,] _rooms;
         
@@ -104,6 +104,39 @@ namespace Generator
             }
 
             return stringBuilder.ToString();
+        }
+
+        object ICloneable.Clone() => Clone();
+
+        public Map Clone()
+        {
+            var clone = new Map(Width, Height, RoomWidth, RoomHeight);
+
+            for (var x = 0; x < Width; x++)
+            {
+                for (var y = 0; y < Height; y++)
+                {
+                    if (!HasRoomAt(x, y)) continue;
+
+                    var sourceRoom = _rooms[x, y];
+                    var destinationRoom = clone.CreateRoomAt(x, y);
+                    
+                    Copy(sourceRoom, destinationRoom);
+                }
+            }
+
+            return clone;
+        }
+
+        private static void Copy(IRoom source, IRoom destination)
+        {
+            for (var x = 0; x < source.Width; x++)
+            {
+                for (var y = 0; y < source.Height; y++)
+                {
+                    destination[x, y] = source[x, y];
+                }
+            }
         }
 
         IEnumerator IEnumerable.GetEnumerator()
