@@ -7,17 +7,18 @@ using UnityEngine.Tilemaps;
 
 public sealed class TileMapGenerator : MonoBehaviour
 {
-        [SerializeField, Required] private Tilemap _tilemap = default;
+        [SerializeField, Required] private Tilemap _foregroundTilemap = default;
+        [SerializeField, Required] private Tilemap _wallTilemap = default;
+        [SerializeField, Required] private Tilemap _floorTilemap = default;
 
         [SerializeField] private Vector2Int _mapSize = Vector2Int.one;
         [SerializeField] private Vector2Int _roomSize = Vector2Int.one;
 
         [SerializeField, Required, AssetSelector] private RoomTemplates _templates = default;
 
+
         [SerializeField, Required, AssetSelector]
         private CellToTileTranslator _cellToTileTranslator = default;
-
-        [SerializeField, Required] private Tilemap _floorTilemap = default;
 
         [SerializeField, Required, AssetSelector]
         private TileBase _floorTile = default;
@@ -37,7 +38,7 @@ public sealed class TileMapGenerator : MonoBehaviour
 
         public Vector2Int WorldToCell(Vector2 worldPosition)
         {
-                return (Vector2Int) _tilemap.WorldToCell(worldPosition);
+                return (Vector2Int) _foregroundTilemap.WorldToCell(worldPosition);
         }
 
         [Button]
@@ -88,8 +89,9 @@ public sealed class TileMapGenerator : MonoBehaviour
         [Button]
         private void Clear()
         {
-                _tilemap.ClearAllTiles();
+                _foregroundTilemap.ClearAllTiles();
                 _floorTilemap.ClearAllTiles();
+                _wallTilemap.ClearAllTiles();
         }
 
         public Map Map { get; private set; }
@@ -111,7 +113,11 @@ public sealed class TileMapGenerator : MonoBehaviour
                                 var tile = _cellToTileTranslator.Translate(cell);
                                 var position = new Vector3Int(startX + dx, startY + dy, 0);
 
-                                _tilemap.SetTile(position, tile);
+                                if (cell == Generator.Cells.Wall)
+                                        _wallTilemap.SetTile(position, tile);
+                                else
+                                        _foregroundTilemap.SetTile(position, tile);
+                                
                                 _floorTilemap.SetTile(position, _floorTile);
                         }
                 }
@@ -131,7 +137,7 @@ public sealed class TileMapGenerator : MonoBehaviour
                         {
                                 var position = new Vector3Int(startX + dx, startY + dy, 0);
                                 
-                                _tilemap.SetTile(position, null);
+                                _foregroundTilemap.SetTile(position, null);
                                 _floorTilemap.SetTile(position, null);
                         }
                 }
