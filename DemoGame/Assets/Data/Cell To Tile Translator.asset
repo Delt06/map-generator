@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 07ee122cecec45ab9e4a0133208242df, type: 3}
+  m_Name: Cell To Tile Translator
+  m_EditorClassIdentifier: 
+  _translations:
+  - Cell: {fileID: 11400000, guid: 28a143b92c2de194f87794928d4864a8, type: 2}
+    Tile: {fileID: 11400000, guid: 2d43df296fe617842aaa73d5115bb4be, type: 2}
+  - Cell: {fileID: 11400000, guid: 8c2173c39f51fdf4493713019afc065d, type: 2}
+    Tile: {fileID: 11400000, guid: 71437c45604c7ca4f86831ee794c7beb, type: 2}
+  - Cell: {fileID: 11400000, guid: 353e3119c4af1cf429e19439346e73c1, type: 2}
+    Tile: {fileID: 11400000, guid: 75ea9b81f1c17ba4eb5d98fa79e53562, type: 2}
+  - Cell: {fileID: 11400000, guid: db765611c393e1c4d9a80dffd952204f, type: 2}
+    Tile: {fileID: 11400000, guid: cd0bbfc1136f47e4b8d9b472839f0085, type: 2}
+  _fallbackTile: {fileID: 11400000, guid: 2d43df296fe617842aaa73d5115bb4be, type: 2}
