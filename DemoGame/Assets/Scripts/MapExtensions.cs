@@ -8,27 +8,9 @@ public static class MapExtensions
         public static Map GetCroppedClone([NotNull] this Map map)
         {
                 if (map == null) throw new ArgumentNullException(nameof(map));
+                if (!map.HasBounds(out var bounds)) throw new InvalidOperationException("The map is empty.");
 
-                var minX = map.Width;
-                var minY = map.Height;
-                var maxX = -1;
-                var maxY = -1;
-
-                for (var x = 0; x < map.Width; x++)
-                {
-                        for (var y = 0; y < map.Height; y++)
-                        {
-                                if (!map.HasRoomAt(x, y)) continue;
-
-                                minX = Mathf.Min(minX, x);
-                                minY = Mathf.Min(minY, y);
-                                
-                                maxX = Mathf.Max(maxX, x);
-                                maxY = Mathf.Max(maxY, y);
-                        }
-                }
-
-                if (maxX < minX || maxY < minY) throw new InvalidOperationException("Map is empty.");
+                var (minX, maxX, minY, maxY) = bounds;
 
                 var width = maxX - minX + 1;
                 var height = maxY - minY + 1;
@@ -54,8 +36,28 @@ public static class MapExtensions
 
                 return clone;
         }
-        
-        
+
+        private static bool HasBounds(this Map map, out (int minX, int maxX, int minY, int maxY) bounds)
+        {
+                bounds = (map.Width, -1, map.Height, -1);
+
+                for (var x = 0; x < map.Width; x++)
+                {
+                        for (var y = 0; y < map.Height; y++)
+                        {
+                                if (!map.HasRoomAt(x, y)) continue;
+
+                                bounds.minX = Mathf.Min(bounds.minX, x);
+                                bounds.minY = Mathf.Min(bounds.minY, y);
+                                
+                                bounds.maxX = Mathf.Max(bounds.maxX, x);
+                                bounds.maxY = Mathf.Max(bounds.maxY, y);
+                        }
+                }
+
+                return bounds.maxX >= bounds.minX && bounds.maxY >= bounds.minY;
+        }
+
         public static Map GetCloneWithExtraBorderRooms([NotNull] this Map map, int borderThicknessInRooms)
         {
                 if (map == null) throw new ArgumentNullException(nameof(map));
