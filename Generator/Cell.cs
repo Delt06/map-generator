@@ -2,45 +2,27 @@ using System;
 
 namespace Generator
 {
-    public readonly struct Cell : IEquatable<Cell>
-    {
-        public readonly char Symbol;
+	public readonly struct Cell : IEquatable<Cell>
+	{
+		public readonly char Symbol;
 
-        public Cell(char symbol)
-        {
-            Symbol = symbol;
-        }
+		public Cell(char symbol) => Symbol = symbol;
 
-        public bool Equals(Cell other)
-        {
-            return Symbol == other.Symbol;
-        }
+		public bool Equals(Cell other) => Symbol == other.Symbol;
 
-        public override bool Equals(object obj)
-        {
-            if (!(obj is Cell other)) return false;
+		public override bool Equals(object obj)
+		{
+			if (!(obj is Cell other)) return false;
 
-            return Equals(other);
-        }
+			return Equals(other);
+		}
 
-        public override int GetHashCode()
-        {
-            return Symbol.GetHashCode();
-        }
+		public override int GetHashCode() => Symbol.GetHashCode();
 
-        public static bool operator ==(Cell cell1, Cell cell2)
-        {
-            return cell1.Equals(cell2);
-        }
+		public static bool operator ==(Cell cell1, Cell cell2) => cell1.Equals(cell2);
 
-        public static bool operator !=(Cell cell1, Cell cell2)
-        {
-            return !(cell1 == cell2);
-        }
+		public static bool operator !=(Cell cell1, Cell cell2) => !(cell1 == cell2);
 
-        public override string ToString()
-        {
-            return Symbol.ToString();
-        }
-    }
+		public override string ToString() => Symbol.ToString();
+	}
 }

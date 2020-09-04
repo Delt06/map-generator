@@ -3,106 +3,104 @@ using System.Collections.Generic;
 
 namespace Generator
 {
-    public class MapGenerator
-    {
-        public float MinDensity { get; set; } = 0.25f;
-        public float BranchProbability { get; set; } = 0.25f;
-        
-        private readonly Map _map;
+	public class MapGenerator
+	{
+		public float MinDensity { get; set; } = 0.25f;
+		public float BranchProbability { get; set; } = 0.25f;
 
-        public MapGenerator(Map map)
-        {
-            _map = map ?? throw new ArgumentNullException(nameof(map));
-        }
+		private readonly Map _map;
 
-        public IReadOnlyList<IRoom> RoomTemplates => _roomTemplates;
+		public MapGenerator(Map map) => _map = map ?? throw new ArgumentNullException(nameof(map));
 
-        public MapGenerator AddRoomTemplate(IRoom room)
-        {
-            if (room == null) throw new ArgumentNullException(nameof(room));
-            if (room.Width != _map.RoomWidth || room.Height != _map.RoomHeight) throw new ArgumentException(nameof(room));
-            
-            _roomTemplates.Add(room);
+		public IReadOnlyList<IRoom> RoomTemplates => _roomTemplates;
 
-            return this;
-        }
+		public MapGenerator AddRoomTemplate(IRoom room)
+		{
+			if (room == null) throw new ArgumentNullException(nameof(room));
+			if (room.Width != _map.RoomWidth || room.Height != _map.RoomHeight)
+				throw new ArgumentException(nameof(room));
 
-        private readonly List<IRoom> _roomTemplates = new List<IRoom>();
+			_roomTemplates.Add(room);
 
-        public MapGenerator RemoveRoomTemplate(IRoom room)
-        {
-            _roomTemplates.Remove(room);
+			return this;
+		}
 
-            return this;
-        }
+		private readonly List<IRoom> _roomTemplates = new List<IRoom>();
 
-        public void Generate()
-        {
-            _map.Clear();
+		public MapGenerator RemoveRoomTemplate(IRoom room)
+		{
+			_roomTemplates.Remove(room);
 
-            if (RoomTemplates.Count == 0) return;
+			return this;
+		}
 
-            var (startX, startY) = GetStart();
-            var startingRoom = GetRandomRoomTemplate();
+		public void Generate()
+		{
+			_map.Clear();
 
-            _map.SetRoom(startX, startY, startingRoom);
-            
-            _queue.Clear();
-            _queue.Enqueue((startX, startY));
-            _roomCount = 1;
+			if (RoomTemplates.Count == 0) return;
 
-            while (_queue.Count > 0)
-            {
-                var (x, y) = _queue.Dequeue();
-                
-                TryBranchTo(x + 1, y);
-                TryBranchTo(x - 1, y);
-                TryBranchTo(x, y + 1);
-                TryBranchTo(x, y - 1);
-            }
-            
-            _map.AddOuterWalls();
-        }
+			var (startX, startY) = GetStart();
+			var startingRoom = GetRandomRoomTemplate();
 
-        private (int x, int y) GetStart()
-        {
-            var x = _map.Width / 2;
-            var y = _map.Height / 2;
+			_map.SetRoom(startX, startY, startingRoom);
 
-            return (x, y);
-        }
+			_queue.Clear();
+			_queue.Enqueue((startX, startY));
+			_roomCount = 1;
 
-        private IRoom GetRandomRoomTemplate()
-        {
-            var index = _random.Next() % RoomTemplates.Count;
-            return RoomTemplates[index];
-        }
+			while (_queue.Count > 0)
+			{
+				var (x, y) = _queue.Dequeue();
 
-        private bool ShouldBranch => BelowMinDensity || _random.NextDouble() <= BranchProbability;
+				TryBranchTo(x + 1, y);
+				TryBranchTo(x - 1, y);
+				TryBranchTo(x, y + 1);
+				TryBranchTo(x, y - 1);
+			}
 
-        private bool BelowMinDensity => (float) _roomCount / (_map.Width * _map.Height) < MinDensity;
+			_map.AddOuterWalls();
+		}
 
-        private void TryBranchTo(int x, int y)
-        {
-            if (!CanBranchTo(x, y) || !ShouldBranch) return;
-            
-            var room = GetRandomRoomTemplate();
-            _map.SetRoom(x, y, room);
-            
-            _queue.Enqueue((x, y));
-            _roomCount++;
-        }
+		private (int x, int y) GetStart()
+		{
+			var x = _map.Width / 2;
+			var y = _map.Height / 2;
 
-        private bool CanBranchTo(int x, int y)
-        {
-            if (x < 0 || x >= _map.Width) return false;
-            if (y < 0 || y >= _map.Height) return false;
+			return (x, y);
+		}
 
-            return !_map.HasRoomAt(x, y);
-        }
+		private IRoom GetRandomRoomTemplate()
+		{
+			var index = _random.Next() % RoomTemplates.Count;
+			return RoomTemplates[index];
+		}
 
-        private readonly Queue<(int x, int y)> _queue = new Queue<(int x, int y)>();
-        private int _roomCount = 0;
-        private readonly Random _random = new Random();
-    }
+		private bool ShouldBranch => BelowMinDensity || _random.NextDouble() <= BranchProbability;
+
+		private bool BelowMinDensity => (float) _roomCount / (_map.Width * _map.Height) < MinDensity;
+
+		private void TryBranchTo(int x, int y)
+		{
+			if (!CanBranchTo(x, y) || !ShouldBranch) return;
+
+			var room = GetRandomRoomTemplate();
+			_map.SetRoom(x, y, room);
+
+			_queue.Enqueue((x, y));
+			_roomCount++;
+		}
+
+		private bool CanBranchTo(int x, int y)
+		{
+			if (x < 0 || x >= _map.Width) return false;
+			if (y < 0 || y >= _map.Height) return false;
+
+			return !_map.HasRoomAt(x, y);
+		}
+
+		private readonly Queue<(int x, int y)> _queue = new Queue<(int x, int y)>();
+		private int _roomCount = 0;
+		private readonly Random _random = new Random();
+	}
 }

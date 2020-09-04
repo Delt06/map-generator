@@ -5,203 +5,196 @@ using System.Text;
 
 namespace Generator
 {
-    public sealed class Map : IEnumerable<IRoom>, ICloneable
-    {
-        private readonly IRoom[,] _rooms;
-        
-        public int Width { get; }
-        public int Height { get; }
-        public int RoomWidth { get; }
-        public int RoomHeight { get; }
+	public sealed class Map : IEnumerable<IRoom>, ICloneable
+	{
+		private readonly IRoom[,] _rooms;
 
-        public IRoom CreateRoomAt(int x, int y)
-        {
-            CheckThatCoordinatesAreValid(x, y);
+		public int Width { get; }
+		public int Height { get; }
+		public int RoomWidth { get; }
+		public int RoomHeight { get; }
 
-            var room = CreateRoom();
-            _rooms[x, y] = room;
+		public IRoom CreateRoomAt(int x, int y)
+		{
+			CheckThatCoordinatesAreValid(x, y);
 
-            return room;
-        }
+			var room = CreateRoom();
+			_rooms[x, y] = room;
 
-        private IRoom CreateRoom()
-        {
-            return Room.OfSize(RoomWidth, RoomHeight);
-        }
+			return room;
+		}
 
-        public void RemoveRoomAt(int x, int y)
-        {
-            CheckThatCoordinatesAreValid(x, y);
+		private IRoom CreateRoom() => Room.OfSize(RoomWidth, RoomHeight);
 
-            _rooms[x, y] = null;
-        }
+		public void RemoveRoomAt(int x, int y)
+		{
+			CheckThatCoordinatesAreValid(x, y);
 
-        public bool HasRoomAt(int x, int y)
-        {
-            CheckThatCoordinatesAreValid(x, y);
+			_rooms[x, y] = null;
+		}
 
-            return _rooms[x, y] != null;
-        }
+		public bool HasRoomAt(int x, int y)
+		{
+			CheckThatCoordinatesAreValid(x, y);
 
-        private void CheckThatCoordinatesAreValid(int x, int y)
-        {
-            if (x < 0 || x >= Width) throw new ArgumentOutOfRangeException(nameof(x));
-            if (y < 0 || y >= Height) throw new ArgumentOutOfRangeException(nameof(y));
-        }
-        
-        public IRoom this[int x, int y]
-        {
-            get
-            {
-                CheckThatCoordinatesAreValid(x, y);
+			return _rooms[x, y] != null;
+		}
 
-                return _rooms[x, y] ?? throw new ArgumentException($"Room at ({x.ToString()}; {y.ToString()}) does not exist.");
-            }
-        }
+		private void CheckThatCoordinatesAreValid(int x, int y)
+		{
+			if (x < 0 || x >= Width) throw new ArgumentOutOfRangeException(nameof(x));
+			if (y < 0 || y >= Height) throw new ArgumentOutOfRangeException(nameof(y));
+		}
 
-        public int TotalWidth => Width * RoomWidth;
-        public int TotalHeight => Height * RoomHeight;
+		public IRoom this[int x, int y]
+		{
+			get
+			{
+				CheckThatCoordinatesAreValid(x, y);
 
-        public IEnumerator<IRoom> GetEnumerator()
-        {
-            for (var x = 0; x < Width; x++)
-            {
-                for (var y = 0; y < Height; y++)
-                {
-                    if (HasRoomAt(x, y))
-                        yield return _rooms[x, y];
-                }
-            }
-        }
+				return _rooms[x, y] ??
+				       throw new ArgumentException($"Room at ({x.ToString()}; {y.ToString()}) does not exist.");
+			}
+		}
 
-        public override string ToString()
-        {
-            var stringBuilder = new StringBuilder();
+		public int TotalWidth => Width * RoomWidth;
+		public int TotalHeight => Height * RoomHeight;
 
-            for (var y = TotalHeight - 1; y >= 0; y--)
-            {
-                for (var x = 0; x < TotalWidth; x++)
-                {
-                    var roomX = x / RoomWidth;
-                    var roomY = y / RoomHeight;
+		public IEnumerator<IRoom> GetEnumerator()
+		{
+			for (var x = 0; x < Width; x++)
+			{
+				for (var y = 0; y < Height; y++)
+				{
+					if (HasRoomAt(x, y))
+						yield return _rooms[x, y];
+				}
+			}
+		}
 
-                    var room = _rooms[roomX, roomY];
-                    
-                    if (room == null)
-                    {
-                        stringBuilder.Append(' ');
-                    }
-                    else
-                    {
-                        var cellX = x % RoomWidth;
-                        var cellY = y % RoomHeight;
+		public override string ToString()
+		{
+			var stringBuilder = new StringBuilder();
 
-                        stringBuilder.Append(room[cellX, cellY].Symbol);
-                    }
-                }
+			for (var y = TotalHeight - 1; y >= 0; y--)
+			{
+				for (var x = 0; x < TotalWidth; x++)
+				{
+					var roomX = x / RoomWidth;
+					var roomY = y / RoomHeight;
 
-                stringBuilder.Append('\n');
-            }
+					var room = _rooms[roomX, roomY];
 
-            return stringBuilder.ToString();
-        }
+					if (room == null)
+					{
+						stringBuilder.Append(' ');
+					}
+					else
+					{
+						var cellX = x % RoomWidth;
+						var cellY = y % RoomHeight;
 
-        object ICloneable.Clone() => Clone();
+						stringBuilder.Append(room[cellX, cellY].Symbol);
+					}
+				}
 
-        public Map Clone()
-        {
-            var clone = new Map(Width, Height, RoomWidth, RoomHeight);
+				stringBuilder.Append('\n');
+			}
 
-            for (var x = 0; x < Width; x++)
-            {
-                for (var y = 0; y < Height; y++)
-                {
-                    if (!HasRoomAt(x, y)) continue;
+			return stringBuilder.ToString();
+		}
 
-                    var sourceRoom = _rooms[x, y];
-                    var destinationRoom = clone.CreateRoomAt(x, y);
-                    
-                    Copy(sourceRoom, destinationRoom);
-                }
-            }
+		object ICloneable.Clone() => Clone();
 
-            return clone;
-        }
+		public Map Clone()
+		{
+			var clone = new Map(Width, Height, RoomWidth, RoomHeight);
 
-        private static void Copy(IRoom source, IRoom destination)
-        {
-            for (var x = 0; x < source.Width; x++)
-            {
-                for (var y = 0; y < source.Height; y++)
-                {
-                    destination[x, y] = source[x, y];
-                }
-            }
-        }
+			for (var x = 0; x < Width; x++)
+			{
+				for (var y = 0; y < Height; y++)
+				{
+					if (!HasRoomAt(x, y)) continue;
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+					var sourceRoom = _rooms[x, y];
+					var destinationRoom = clone.CreateRoomAt(x, y);
 
-        private Map(int width, int height, int roomWidth, int roomHeight)
-        {
-            Width = width;
-            Height = height;
-            RoomWidth = roomWidth;
-            RoomHeight = roomHeight;
-            
-            _rooms = new IRoom[Width, Height];
-        }
+					Copy(sourceRoom, destinationRoom);
+				}
+			}
 
-        public class Builder
-        {
-            public int Width { get; private set; } = 1;
-            public int Height { get; private set; } = 1;
-            public int RoomWidth { get; private set; } = 1;
-            public int RoomHeight { get; private set; } = 1;
+			return clone;
+		}
 
-            public Builder WithSize(int width, int height)
-            {
-                if (width <= 0) throw new ArgumentOutOfRangeException(nameof(width));
-                if (height <= 0) throw new ArgumentOutOfRangeException(nameof(height));
+		private static void Copy(IRoom source, IRoom destination)
+		{
+			for (var x = 0; x < source.Width; x++)
+			{
+				for (var y = 0; y < source.Height; y++)
+				{
+					destination[x, y] = source[x, y];
+				}
+			}
+		}
 
-                Width = width;
-                Height = height;
+		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-                return this;
-            }
+		private Map(int width, int height, int roomWidth, int roomHeight)
+		{
+			Width = width;
+			Height = height;
+			RoomWidth = roomWidth;
+			RoomHeight = roomHeight;
 
-            public Builder WithRoomSize(int width, int height)
-            {
-                if (width <= 0) throw new ArgumentOutOfRangeException(nameof(width));
-                if (height <= 0) throw new ArgumentOutOfRangeException(nameof(height));
+			_rooms = new IRoom[Width, Height];
+		}
 
-                RoomWidth = width;
-                RoomHeight = height;
+		public class Builder
+		{
+			public int Width { get; private set; } = 1;
+			public int Height { get; private set; } = 1;
+			public int RoomWidth { get; private set; } = 1;
+			public int RoomHeight { get; private set; } = 1;
 
-                return this;
-            }
+			public Builder WithSize(int width, int height)
+			{
+				if (width <= 0) throw new ArgumentOutOfRangeException(nameof(width));
+				if (height <= 0) throw new ArgumentOutOfRangeException(nameof(height));
 
-            public Map Build()
-            {
-                return new Map
-                (
-                    Width, Height, 
-                    RoomWidth, RoomHeight
-                );
-            }
-        }
+				Width = width;
+				Height = height;
 
-        public void Clear()
-        {
-            for (var x = 0; x < Width; x++)
-            {
-                for (var y = 0; y < Height; y++)
-                {
-                    _rooms[x, y] = null;
-                }
-            }
-        }
-    }
+				return this;
+			}
+
+			public Builder WithRoomSize(int width, int height)
+			{
+				if (width <= 0) throw new ArgumentOutOfRangeException(nameof(width));
+				if (height <= 0) throw new ArgumentOutOfRangeException(nameof(height));
+
+				RoomWidth = width;
+				RoomHeight = height;
+
+				return this;
+			}
+
+			public Map Build() =>
+				new Map
+				(
+					Width, Height,
+					RoomWidth, RoomHeight
+				);
+		}
+
+		public void Clear()
+		{
+			for (var x = 0; x < Width; x++)
+			{
+				for (var y = 0; y < Height; y++)
+				{
+					_rooms[x, y] = null;
+				}
+			}
+		}
+	}
 }
